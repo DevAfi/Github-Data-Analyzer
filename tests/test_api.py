@@ -34,8 +34,27 @@ def test_all_requests():
     languages = api.get_languages(owner, repo)
     print(f"✅ get_languages works! Languages: {list(languages.keys())}")
 
+def test_rate_limit():
+    """Test rate limit checking"""
+    api = GitHubAPI()
+    
+    rate_limit = api.get_rate_limit()
+    core = rate_limit['resources']['core']
+    
+    print(f"✅ Rate Limit Info:")
+    print(f"   Limit: {core['limit']} requests/hour")
+    print(f"   Remaining: {core['remaining']}")
+    print(f"   Resets at: {core['reset']}")
+    
+    # Test with invalid repo to see error handling
+    print("\n Testing error handling...")
+    try:
+        api.get_repo("invalid", "repo-that-does-not-exist-12345")
+    except Exception as e:
+        print(f"✅ Error caught: {e}")
 
 
 if __name__ == "__main__":
     #test_generic_request()
-    test_all_requests()
+    #test_all_requests()
+    test_rate_limit()

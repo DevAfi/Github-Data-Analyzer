@@ -21,10 +21,28 @@ class GitHubAPI:
             """Make a GET request to the Github API"""
             url = f"{self.base_url}{endpoint}"
 
-            response = self.session.get(url, params=params)
-            response.raise_for_status()
+            try:
+                response = self.session.get(url, params=params)
+                response.raise_for_status()
 
-            return response.json()
+                remaining = response.headers.get('X-RateLimit-Remaining')
+                if remaining and int(remaining) < 10:
+                    print(f"Warning! Only {remaining} attempts remaining!")
+            
+                return response.json()
+            
+            except requests.exceptions.HTTPError as e:
+                if response.status_code == 403:
+                    raise Exception(f"Rate limit exceeded or access forbidden: {e}")
+                elif response.status_code == 404:
+                    raise Exception(f"Repository not found: {e}")
+                else:
+                    raise Exception(f"HTTP error occurred: {e}")
+
+            except requests.exceptions.RequestException as e:
+                raise Exception(f"Error connecting to GitHub API: {e}")
+
+
     
     def get_repo(self, owner: str, repo: str) -> Dict[str, Any]:
         """Get repo information"""
@@ -33,7 +51,7 @@ class GitHubAPI:
     def get_commits(self, owner: str, repo: str, per_page: int = 100, page: int = 1) -> List[Dict[str, Any]]:
         """Get commits on a repo"""
         params = {"per_page": per_page, "page": page}
-        return self._make_request(f"/repost/{owner}/{repo}/commits", params=params)
+        return self._make_request(f"/repos/{owner}/{repo}/commits", params=params)
     
     def get_contributors(self, owner: str, repo: str) -> List[Dict[str, Any]]:
         """Get contributors to a repo"""
@@ -42,3 +60,6 @@ class GitHubAPI:
     def get_languages(self, owner: str, repo: str) -> Dict[str, int]:
         """Get languages used in a repo"""
         return self._make_request(f"/repos/{owner}/{repo}/languages")
+
+    def get_rate_limit(self) -> Dict[str, Any]:
+        return self._make_request("/rate_limit")
