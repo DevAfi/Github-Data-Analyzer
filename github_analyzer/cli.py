@@ -1,3 +1,5 @@
+import argparse
+
 from .api import GitHubAPI
 from .analyzer import GitHubAnalyzer
 from rich.console import Console
@@ -82,13 +84,40 @@ def display_results(results):
 
 def main():
     """Main CLI entry point."""
+    parser = argparse.ArgumentParser(
+        description="Analyze GitHub repositories",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python main.py                    # Interactive mode
+  python main.py torvalds/linux     # Analyze specific repo
+  python main.py --no-cache facebook/react
+        """
+    )
+    
+    parser.add_argument(
+        'repository',
+        nargs='?',
+        help='Repository in owner/repo format'
+    )
+    parser.add_argument(
+        '--no-cache',
+        action='store_true',
+        help='Disable caching'
+    )
+    
+    args = parser.parse_args()
+    
     console.print(Panel.fit(
         "[bold cyan]GitHub Repository Analyzer[/bold cyan]\n[dim]Analyze any public GitHub repository[/dim]",
         border_style="cyan"
     ))
     
-    # Get repository input
-    repo_input = console.input("\n[bold cyan]Enter repository (owner/repo):[/bold cyan] ")
+    # Get repository - either from args or prompt
+    if args.repository:
+        repo_input = args.repository
+    else:
+        repo_input = console.input("\n[bold cyan]Enter repository (owner/repo):[/bold cyan] ")
     
     try:
         owner, repo = repo_input.split('/')
@@ -97,7 +126,7 @@ def main():
         return
     
     # Initialize API and Analyzer
-    api = GitHubAPI(use_cache=True)
+    api = GitHubAPI(use_cache=not args.no_cache)
     analyzer = GitHubAnalyzer(api)
     
     # Analyze with progress indicator
