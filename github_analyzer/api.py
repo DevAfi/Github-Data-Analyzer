@@ -1,13 +1,16 @@
 import requests
 from typing import Optional, Dict, Any, List
 from .config import GITHUB_TOKEN, GITHUB_API_BASE
+from .cache import SimpleCache
 
 class GitHubAPI:
-    def __init__(self, token: Optional[str] = None):
+    def __init__(self, token: Optional[str] = None, use_cache: bool = True):
         """   Initialize the Github API client    """
         self.token = token or GITHUB_TOKEN
         self.base_url = GITHUB_API_BASE
         self.session = requests.Session()
+        self.use_cache = use_cache
+        self.cache = SimpleCache() if use_cache else None
 
         #Headers for all sessions
         self.session.headers.update({
@@ -21,6 +24,12 @@ class GitHubAPI:
             """Make a GET request to the Github API"""
             url = f"{self.base_url}{endpoint}"
 
+            if self.use_cache:
+                cachedData = self.cache.get(url, params=params)
+                if cachedData:
+                    print(f"Using cached data for {endpoint}")
+                    return cachedData
+
             try:
                 response = self.session.get(url, params=params)
                 response.raise_for_status()
@@ -29,7 +38,12 @@ class GitHubAPI:
                 if remaining and int(remaining) < 10:
                     print(f"Warning! Only {remaining} attempts remaining!")
             
-                return response.json()
+                data = response.json()
+
+                if self.use_cache:
+                    self.cache.set(url, data, params=params)
+
+                return data
             
             except requests.exceptions.HTTPError as e:
                 if response.status_code == 403:

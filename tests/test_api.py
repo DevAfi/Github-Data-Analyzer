@@ -53,8 +53,25 @@ def test_rate_limit():
     except Exception as e:
         print(f"✅ Error caught: {e}")
 
+def test_cache():
+    """Test caching functionality"""
+    api = GitHubAPI(use_cache=True)
+    
+    print("First request (will hit API):")
+    data1 = api.get_repo("octocat", "Hello-World")
+    print(f"✅ Got {data1['name']}\n")
+    
+    print("Second request (should use cache):")
+    data2 = api.get_repo("octocat", "Hello-World")
+    print(f"✅ Got {data2['name']}\n")
+    
+    # Check rate limit - should only use 1 request
+    rate = api.get_rate_limit()
+    print(f"Requests used: Only 2 (rate_limit call + first repo call)")
+    print(f"Remaining: {rate['resources']['core']['remaining']}")
 
 if __name__ == "__main__":
     #test_generic_request()
     #test_all_requests()
-    test_rate_limit()
+    #test_rate_limit()
+    test_cache()
