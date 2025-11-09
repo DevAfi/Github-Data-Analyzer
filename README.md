@@ -18,6 +18,8 @@ A powerful command-line tool for analyzing GitHub repositories with beautiful te
 - **🔐 GitHub API Integration** - Full support for authenticated requests with rate limit handling
 
 This repo includes a complete CLI tool for analyzing GitHub repositories with professional-grade terminal output and comprehensive data insights.
+## Related Projects
+- [github-analyzer-web](https://github.com/yourusername/github-analyzer-web) - Web dashboard version of this tool
 
 ### Tech Stack
 - **Python 3.9+**
