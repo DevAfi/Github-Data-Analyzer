@@ -19,7 +19,7 @@ A powerful command-line tool for analyzing GitHub repositories with beautiful te
 
 This repo includes a complete CLI tool for analyzing GitHub repositories with professional-grade terminal output and comprehensive data insights.
 ## Related Projects
-- [github-analyzer-web](https://github.com/yourusername/github-analyzer-web) - Web dashboard version of this tool
+- [github-analyzer-web](https://github.com/DevAfi/Github-Data-Analyzer-Web) - Web dashboard version of this tool
 
 ### Tech Stack
 - **Python 3.9+**
